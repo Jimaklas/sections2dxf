@@ -52,3 +52,31 @@ docs/_build/
 
 # PyBuilder
 target/
+
+# Main program input data
+input.py
+*.[gG][rR][dD]
+*.[dD][xX][fF]
+
+# Eclipse / LiClipse / Pydev
+*.pydevproject
+.project
+.metadata
+bin/**
+tmp/**
+tmp/**/*
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.classpath
+.settings/
+.loadpath
+
+# PyCharm
+.idea/
+
+# Spyder
+*.spyderworkspace
+*.spyderproject
