@@ -22,9 +22,9 @@ class Section(_MutableMapping):
 
         decimal.getcontext().prec = FLOAT_PREC
         if not isinstance(station, decimal.Decimal):
+            print "At section %s with station %s: " % (name, station)
+            print "Changing the type of station from %s to %s" % (type(station), decimal.Decimal)
             station = decimal.Decimal(station)
-            print "At section %s with station %s:" % (name, station)
-            print "Converted station value to decimal.Decimal"
         self.station = station
 
     def __getitem__(self, key):
