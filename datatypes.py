@@ -3,18 +3,29 @@ from collections import MutableMapping as _MutableMapping
 
 
 class Section(_MutableMapping):
-    """A dict-like datatype mapping layer names to a list of
-    (<offset>, <elevation>) data. For example:
+    """A dict-like datatype mapping layer names to a list of (<offset>, <elevation>)
+    data. Also contains info on section name and station. For example:
 
-    Section("D157", "1234.56", {
+    Section("D157", decimal.Decimal(1234.56), {
             "Natural Ground": [(-10.0, 70.0), (0.0, 70.08), (10.0, 70.40)],
             "Excavation": [(-10.0, 70.0), (-10.0, 69.0), (10.0, 69.0), (10.0, 70.40)]})
     """
     def __init__(self, name=None, station=None, *args):
-        self.name = name
-        self.station = station
         self.data = dict()
         self.update(dict(*args))
+        self.name = name
+
+        # Maybe taking care of <station> type should not be done here.
+        # Just making sure inconsistent datatypes will not exist in main program.
+        import decimal
+        from input import FLOAT_PREC
+
+        decimal.getcontext().prec = FLOAT_PREC
+        if not isinstance(station, decimal.Decimal):
+            station = decimal.Decimal(station)
+            print "At section %s with station %s:" % (name, station)
+            print "Converted station value to decimal.Decimal"
+        self.station = station
 
     def __getitem__(self, key):
         return self.data[key]

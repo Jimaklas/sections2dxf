@@ -1,46 +1,58 @@
 # -*- coding: utf-8 -*-
 
-import decimal
 from input import *
 from datatypes import *
 
-decimal.getcontext().prec = FLOAT_PREC
 
-
-def readsection(f):
-    """Read section data from a GRD file object <f> and
-    return a <Section> object.
+#------------------------------------------------------------------------------
+def readsection(grd):
+    """Read data of a single section from a GRD file object <grd> and return data
+    needed to construct a <Section> object. A <decimal.Decimal> object is used to
+    represent the station of the section because that value is going to be used
+    as a key in the <sections> dictionary. In order for <key in sections> to be
+    evaluated correctly at all times we need a float value that can be compared
+    for equality in a consistent manner.
     """
-    secname, station = f.readline().strip().split()  # ValueError is raised at EOF
+    import decimal
+    decimal.getcontext().prec = FLOAT_PREC
+
+    secname, station = grd.readline().strip().split()  # ValueError is raised at EOF
 
     data = []
-    line = f.readline().strip()
+    line = grd.readline().strip()
     while not line.startswith("*"):
         offset, elev = line.split()
         data.append((float(offset), float(elev)))
-        line = f.readline().strip()
+        line = grd.readline().strip()
 
     return secname, decimal.Decimal(station), data
 
-# Read section data from input files. Create the Section objects
-# and map their stations to themselves
-sections = {}
-for lname, fname in LAYERS.items():
-    with open(fname) as inpf:
-        assert inpf.readline().strip().startswith("*")
-        while True:
-            try:
-                secname, station, ldata = readsection(inpf)
-                section = sections[station]  # May raise KeyError
-                assert section.name == secname
-                section[lname] = ldata
 
-            except KeyError:
-                section = Section(secname, station, {lname: ldata})
-                #---------------------------------------------------------------
-                # sections[station] = section
-                # sections[station] = Section(secname, station, {lname: ldata})
-                #---------------------------------------------------------------
+#------------------------------------------------------------------------------
+def getsections():
+    """Read all section data from every GRD file givven and store it in the
+    corresponding <Section> object. At the same time map the <Section> objects
+    to their <station> values.
+    """
+    sections = {}
+    for lname, fname in LAYERS.items():
+        with open(fname) as grd:
+            assert grd.readline().strip().startswith("*")
+            while True:
+                try:
+                    secname, station, ldata = readsection(grd)
+                    section = sections[station]     # May raise KeyError. <station>
+                    assert section.name == secname  # should NOT be a float!!!
+                    section[lname] = ldata
 
-            except ValueError:  # Raised at EOF
-                break
+                except KeyError:
+                    sections[station] = Section(secname, station, {lname: ldata})
+
+                except ValueError:  # Raised at EOF
+                    break
+
+    return sections
+
+# Read section data from input files. GRD files contain data for a givven layer
+# but all layer data need to be contained by the corresponding <Section> object.
+sections = getsections()
