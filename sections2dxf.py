@@ -42,8 +42,7 @@ def getsections():
     for lname, fname in LAYERS.items():
         with open(fname) as grd:
             assert grd.readline().strip().startswith("*")
-            for sectiondata in grdsections(grd):
-                secname, station, ldata = sectiondata
+            for secname, station, ldata in grdsections(grd):
                 try:
                     section = sections[station]  # <station> should NOT be a float!
                     assert section.name == secname
@@ -57,8 +56,8 @@ def getsections():
 # Read section data from input files. GRD files contain data for a givven layer
 # but all layer data need to be contained by the corresponding <Section> object.
 sections = OrderedDict(sorted(getsections().items(), key=lambda t: t[0]))
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 # section = sections.values()[0]
 # print section.name, section.station
 # print "\n".join([(str(elem) + ": " + str(section[elem])) for elem in section.keys()])
-#------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
